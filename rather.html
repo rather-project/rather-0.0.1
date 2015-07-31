@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+ <html class="no-js" id="extension">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible">
+		<title>Rather</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="assets/css/rather.css">
+	</head>
+	<body class="hidden">
+
+		<div id="app">
+			<header>
+				<h1>Rather</h1>
+				<nav>
+					<a href="mailto:hello@getrather.com" class="contact contact-trigger">Contact</a>
+					<a href="#" class="save">Save</a>
+					<a href="#" class="cancel">Cancel</a>
+				</nav>
+			</header>
+
+			<section id="notification"></section>
+
+			<!-- Edit Lists -->
+			<section id="edit-list-screen">
+				<form class="regular sand" action="#">
+					<input type="text" name="name" placeholder="List Title" class="input name">
+					<textarea name="words" placeholder="put, words, or phrases of words, here, like so," class="input words"></textarea>
+				</form>
+
+				<p>Separate each item with a comma.</p>
+			</section>
+
+			<section id="main-screen">
+				
+				<section class="kill-list">
+					<h2>Your kill lists</h2>
+
+					<div class="below">
+						<p class="hide">You don&rsquo;t have any lists! Get started <a href="#">creating one.</a></p>
+						<ul></ul>
+					</div>
+				</section>
+
+				<section class="replacement">
+					<h2>Your replacement content</h2>
+					<input type="search" placeholder="Type any Instagram tag or enter an RSS feed">
+
+					<div class="below">
+						<p class="hide">You don't have any feeds! Content will mute until you enter an Instagram Hashtag or RSS feed.</p>
+						<ul></ul>
+					</div>
+				</section>
+			</section><!-- End #main-screen -->
+		</div>
+
+		<footer>
+			<div class="inner">
+				<div class="filtering-options">
+					Global Filtering
+					<a href="#" class="facebook active">Facebook</a>
+					<a href="#" class="twitter active">Twitter</a>
+				</div>
+
+				<div class="divider"></div>
+
+				<div class="filtering-action">
+					<a href="#" class="replace">Replace</a>
+					<div class="switch"><div class="ball"></div></div>
+					<a href="#" class="mute">Mute</a>
+				</div>
+			</div>
+		</footer>
+
+		<div id="templates">
+			<template id="kill">
+				<li>
+					<span class="x">x</span> <span class="txt">{{content}}</span>
+					<div class="toggles">
+						 <a href="#" class="facebook active">Facebook</a> <a href="#" class="twitter active">Twitter</a>
+					</div>
+				</li>
+			</template>
+
+			<template id="replacements">
+				<li><span class="x">x</span> <span class="txt">{{content}}></span></li>
+			</template>
+
+			<template id="predictive">
+				<li><a href="#"><span class="plus">+</span> <span class="txt">{{content}}</span></a></li>
+			</template>
+
+			<template id="flash">
+				<a href="#" class="error-or-notice-or-success"><span class="txt">{{content}}</span><span class="x">x</span> </a>
+			</template>
+
+			<template id="searchbox-footer">
+				<div class="item footer"><a href="#" class="create"><span class="plus">+</span>Create New List</a></div>
+			</template>
+		</div>
+
+		<script src="assets/js/plugins.js"></script>
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/typeahead.min.js"></script>
+		<script src="assets/js/main.init.js"></script>
+		<script src="assets/js/main.js" defer></script>
+	</body>
+</html>

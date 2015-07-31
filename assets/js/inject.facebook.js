@@ -1,0 +1,1 @@
+rather.inject.init("facebook");
