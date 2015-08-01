@@ -1,7 +1,7 @@
 {
 	"manifest_version" : 2,
 	"name" : "Rather",
-	"version" :	"10.1.2",
+	"version" :	"0.0.1",
 	"description" : "Replace the things you hate on social media with things you'd rather see, like cats.",
 	"homepage_url" : "http://www.getrather.com",
 	"icons" : 
@@ -12,8 +12,7 @@
 	},
 	"permissions" :
 	[
-  		"http://app.getrather.com/",
-  		"https://app.getrather.com/"
+  		
 	],
 	"browser_action" : 
 	{

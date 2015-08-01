@@ -20,9 +20,12 @@ var rather = {
 	user: {
 		token:null,
 
-		setData:function(data) {
+		setData:function(data, cb) {
 			console.log('set user data', data);
-			chrome.storage.local.set({'rather-user-data':data});
+			chrome.storage.local.set({'rather-user-data':data}, function()
+			{
+				if (cb && typeof cb == 'function') cb();
+			});
 		},
 		updateData:function(key, val)
 		{
@@ -141,6 +144,11 @@ var rather = {
 			rather.kill.create(evt,this);
 		});
 
+		document.querySelector('.kill-list h2 a').addEventListener('click', function(evt)
+		{
+			rather.kill.create(evt, this);
+		});
+
 		// filters
 		[].forEach.call( rather.filteringOptions, function(el) {
 			el.addEventListener('click', function(evt) {
@@ -246,7 +254,8 @@ var rather = {
 	},
 
 	// The UI Controls
-	ui: {
+	ui: 
+	{
 		setFlash: function(type,message,duration) {
 			if(!duration || duration == 0) duration = 5000; // default to 5 seconds
 
@@ -367,7 +376,8 @@ var rather = {
 		}
 	},
 
-	kill: {
+	kill: 
+	{
 		add: function(item) {
 			var t = document.getElementById("kill");
 			var c = t.content.childNodes[1].cloneNode(true);
@@ -411,7 +421,6 @@ var rather = {
 			evt.stopPropagation();
 			evt.preventDefault();
 
-			// jk: TO DO: API call to remove a kill list
 			var target = that;
 			var tagName = that.tagName;
 			while(target && tagName != 'LI') {
@@ -432,43 +441,12 @@ var rather = {
 
 			rather.user.getData().then(function(d)
 			{
+				console.log(d,wordset_id);
 				if (!d.wordsets[wordset_id]) return;
 				delete(d.wordsets[wordset_id]);
 				rather.user.setData(d);
 			});
 		},
-
-// 		clone: function(item) {
-// 			var wordset_id = item.wordset_id;
-
-// 			rather.api("list/clone/" + rather.user.token + "/" + wordset_id,null,"get").then(function(err,data) {
-// 				if(err) return rather.log("Error cloning list :: " + wordset_id);
-
-// 				if((data[0] && data[0].type == "error") || data.type == "error") {
-// 					rather.log("Error cloning list :: " + wordset_id);
-// 					return rather.log("data");
-// 				}
-
-// 				if(typeof data.wordsets == "object") {
-// 					var a = [];
-// 					for(var key in data.wordsets) {
-// 						a.push(data.wordsets[key]);
-// 					}
-
-// 					data.wordsets = a;
-// 				}
-
-// 				rather.user.setData(data);
-// //				rather.ui.setFlash("success","List added!");
-
-// 				data.wordsets.forEach(function(item) {
-// 					if(item.wordset_id == wordset_id) {
-// 						rather.kill.add(item);
-// 					}
-// 				})
-
-// 			});
-// 		},
 
 		toggle: function(evt,that) 
 		{
@@ -563,32 +541,35 @@ var rather = {
 				return;
 			}
 
-			data.services = ['facebook','twitter'];
+			data.services = {'facebook':1,'twitter':1};
 			
 			rather.user.getData().then(function(d)
 			{
 				var id = wordset_id ? wordset_id : data.name.replace(/\s/g,'_');
 				data.wordset_id = id;
-				d.wordsets[wordset_id] = data;
-				rather.user.setData(d);
+				if (!d.wordsets) d.wordsets = {};
+				d.wordsets[id] = data;
+				rather.user.setData(d, function()
+				{
+					// repopulate content is easier to do than anything else.
+					if(wordset_id)
+						rather.ui.setFlash("success","List updated! Now hit refresh.");
+					else
+						rather.ui.setFlash("success","New list added!");
+
+					rather.populateContent();
+
+					// go back home
+					document.querySelector("body").removeAttribute("id");
+				});
 			});
-
-			// repopulate content is easier to do than anything else.
-			if(wordset_id)
-				rather.ui.setFlash("success","List updated! Now hit refresh.");
-			else
-				rather.ui.setFlash("success","New list added!");
-
-			rather.populateContent();
-
-			// go back home
-			document.querySelector("body").removeAttribute("id");
-
 		}
 	},
 
-	replacements: {
-		add: function(item) {
+	replacements: 
+	{
+		add: function(item) 
+		{
 			var t = document.getElementById("replacements");
 			var c = t.content.childNodes[1].cloneNode(true);
 
@@ -625,58 +606,17 @@ var rather = {
 
 			var replace_id = target.getAttribute("data-replace_id");
 
-			rather.api("replace/" + rather.user.token + "/" + replace_id,{_method:"DELETE"}).then(function(err,data) {
-				if(err) {
-					rather.log("Error deleting list :: " + wordset_id);
-					return;
-				}
-
-				if((data[0] && data[0].type == "error") || data.type == "error") {
-					rather.log("Error deleting list :: " + wordset_id);
-					rather.log(data);
-					return;
-				}
-
+			rather.user.getData().then(function(data)
+			{
+				delete( data.replacements[replace_id] );
 				rather.user.setData(data);
-//				rather.populateContent();
 			});
 		},
 
-		clone: function(item) {
-			var feed = item.feed_url;
-
-			rather.api("replace/" + rather.user.token,item).then(function(err,data) {
-				if(err) {
-					rather.ui.setFlash("error","Your feed could not be validated.");
-					return;
-				}
-
-				if((data[0] && data[0].type == "error") || data.type == "error") {
-					rather.ui.setFlash("error","Your feed could not be validated.");
-					rather.log(data);
-					return;
-				}
-
-				if(typeof data.replacements == "object") {
-					var a = [];
-					for(var key in data.replacements) {
-						a.push(data.replacements[key]);
-					}
-
-					data.replacements = a;
-				}
-
-				rather.user.setData(data);
-
-				data.replacements.forEach(function(item) {
-					if(item.feed_url == feed) rather.replacements.add(item);
-				});
-
-			});
-		},
-
-		keyUp: function(evt, that) {
-			if(evt.keyCode == 13) {
+		keyUp: function(evt, that) 
+		{
+			if(evt.keyCode == 13) 
+			{
 				evt.preventDefault();
 
 				var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
@@ -696,58 +636,26 @@ var rather = {
 					type = "Instagram Hashtag";
 				}
 
-				// jk : TO DO: check to make sure we don't already have this thing in there.
-				rather.user.getData().then(function(data) {
-					var isDuplicateFeed = false;
-					data.replacements.forEach(function(item) {
-						if(item.feed_url == feed) {
-							isDuplicateFeed = true;
-						}
-					});
-
+				rather.user.getData().then(function(data) 
+				{
+					var isDuplicateFeed = data.replacements[ feed ];
 					if(isDuplicateFeed) {
 						rather.log("Duplicate feed detected.");
 						return;
 					}
 
-					promise.chain([
-						function() {
-							return rather.api("feed/validate",{feed:feed});
-						},
-						function(err,data) {
-							if(err) {
-								var p = new promise.Promise();
-								setTimeout(function() { p.done(err); },5);
-								return p;
-							}
+					data.replacements[ feed ] = 
+					{
+						feed_url: feed,
+						type: type,
+						name: v,
+						replace_id: feed
+					};
 
-							if((data[0] && data[0].type == "error") || data.type == "error") {
-								var p = new promise.Promise();
-								setTimeout(function() { p.done(true); },5);
-								return p;
-							}
+					rather.user.setData(data);
 
-							return rather.api("replace/" + rather.user.token,{"name":v,"feed_url":feed});
-						}
-					]).then(function(err,data) {
-						if(err) {
-							rather.ui.setFlash("error","Your feed could not be validated.");
-							return;
-						}
+					rather.replacements.add(data.replacements[feed]);
 
-						if((data[0] && data[0].type == "error") || data.type == "error") {
-							rather.ui.setFlash("error","Your feed could not be validated.");
-							rather.log(data);
-							return;
-						}
-
-						rather.user.setData(data);
-
-						data.replacements.forEach(function(item) {
-							if(item.feed_url == feed) rather.replacements.add(item);
-						});
-
-					});
 				});
 
 				that.value = "";
@@ -756,10 +664,12 @@ var rather = {
 	},
 
 	// used by background processes
-	feed: {
+	feed: 
+	{
 		parser: new DOMParser(),
 
-		load: function(feed_url) {
+		load: function(feed_url) 
+		{
 			rather.log("Loading Feed :: " + feed_url);
 
 			var p = new promise.Promise();

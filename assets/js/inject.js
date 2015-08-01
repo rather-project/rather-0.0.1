@@ -11,13 +11,16 @@ rather.inject = {
 
 		rather.inject.service = service;
 
-		rather.user.getData().then(function(data) {
-			if(data["filter_" + rather.inject.service][0] == 0) {
+		rather.user.getData().then(function(data) 
+		{
+			if(data["filter_" + service] != 'replace')
+			{
 				rather.log("User has disabled this service. Exiting.");
 				return;
 			}
 
-			if(typeof data.wordsets == "object") {
+			if(typeof data.wordsets == "object")
+			{
 				var a = [];
 				for(var key in data.wordsets) {
 					a.push(data.wordsets[key]);
@@ -32,25 +35,22 @@ rather.inject = {
 			}
 
 			// add words
-			data.wordsets.forEach(function(item) {
-				if(item.services == 1) {
-					item.services = {};
-					item.services[rather.inject.service] = 1;					
-				}
-
+			data.wordsets.forEach(function(item) 
+			{
 				if(!item.services) item.services = {};
-				if(!item.services[rather.inject.service]) item.services[rather.inject.service] = 1;
-
-				if(item.services[rather.inject.service] == 1) {
+				if(item.services[rather.inject.service] == 1)
+				{
 					var words = item.words.split(",");
 					var sanitizedWords = [];
-					for(var i=0;i<words.length;i++) {
-
+					for(var i=0;i<words.length;i++)
+					{
 						var word = words[i];
-						if(word.indexOf("/(.*)", word.length - word.length) !== -1) {
+						if(word.indexOf("/(.*)", word.length - word.length) !== -1)
+						{
 							rather.inject.replacements.push(new RegExp(word));
 						}
-						else {
+						else 
+						{
 							// sanitization courtesy unbaby.me
 							word = word.replace(/^\s+|\s+$/g,'');
 							word = word.toLowerCase().replace(/[^a-z0-9\'\"\s]/g,'').replace(/\s+/g,'\\s+').replace(/([\'\"])/g,'\\$1');
@@ -77,11 +77,8 @@ rather.inject = {
 
 			// if the user is muting...
 			if(data.filter_type) {
-				if(data.filter_type[0]) {
-					if(data.filter_type[0] == "mute") rather.inject.bMuting = true;
-				}
+				if(data.filter_type == "mute") rather.inject.bMuting = true;
 			}
-
 			var ready = new promise.Promise();
 
 			// or they don't have any replacements...
@@ -94,11 +91,13 @@ rather.inject = {
 				data.replacements = a;
 			}
 
-			if(data.replacements.length == 0) {
+			if(data.replacements.length == 0) 
+			{
 				rather.inject.bMuting = true;
 				ready.done();
 			}
-			else {
+			else 
+			{
 				// load all the replacement images
 				var itemsAccountedFor = [];
 
@@ -152,7 +151,8 @@ rather.inject = {
 		}
 	},
 
-	parse: function() {
+	parse: function() 
+	{
 		if(rather.inject.service == "twitter") {
 			var root = document.getElementById('stream-items-id');
 			if(!root) {
@@ -162,7 +162,8 @@ rather.inject = {
 
 			var els = root.querySelectorAll('.tweet');
 
-			[].forEach.call(els,function(el) {
+			[].forEach.call(els,function(el)
+			{
 				if(!el.getAttribute("data-rather-app-is-checked")) {
 					el.setAttribute('data-rather-app-is-checked',"yes");
 
@@ -208,7 +209,8 @@ rather.inject = {
 				}
 			});
 		}
-		else if(rather.inject.service == "facebook") {
+		else if(rather.inject.service == "facebook") 
+		{
 			var root = document.getElementById("stream_pagelet");
 			if(!root) {
 				rather.log("Cannot find the root node on this page. Probably on a login screen or something. Exiting.");
@@ -339,7 +341,5 @@ rather.inject = {
 
 		content.parentNode.insertBefore(div,content);
 
-		// tracking
-		rather.analytics.event('Injected', data["title"], rather.inject.service);
 	}
 };
