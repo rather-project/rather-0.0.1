@@ -214,38 +214,6 @@ var rather = {
 		});			
 	},
 
-	api: function(route,data,method)
-	{
-		if(!method) method = "post";
-
-		var loaded = new promise.Promise();
-
-		// rather.log("API :: " + route);
-		// rather.log(data);
-
-		promise[method](rather.baseURL + route,data).then(function(error,text,xhr) {
-			if(error) {
-				loaded.done(error);
-				return;
-			}
-
-			var resp;
-			try {
-				resp = JSON.parse(xhr.responseText);
-			}
-			catch(e) {
-				rather.log("Error parsing JSON for route :: " + route);
-				loaded.done("There was an error communicating with our systems.");
-				return;
-			}
-
-			loaded.done(null,resp);
-		});
-
-		return loaded;
-	},
-
-
 	// Lets us log things
 	// it's log, log, it's big it's bad it's wood. it's log, log, it's better than bad it's good!
 	log: function(say)
@@ -632,7 +600,7 @@ var rather = {
 					type = "RSS Feed";
 				}
 				else {
-					feed = "http://instagram.com/tags/"  + v + "/feed/recent.rss"
+					feed = "https://instagram.com/explore/tags/"+v+"/";
 					type = "Instagram Hashtag";
 				}
 
@@ -736,6 +704,29 @@ var rather = {
 				}
 			});
 
+			return images;
+		},
+
+		/**
+		 * parse instagram explore page 
+		 * because instagram rss feed is broken now
+		 */
+		parseInstagramPage: function(s)
+		{
+			var arr = s.split('window._sharedData =');
+			if (!arr || !arr[1]) return [];
+			arr = arr[1].split('</script>');
+			var json = arr[0].replace(/[\;\r\n]+$/,'');
+
+			var data = JSON.parse(json);
+			console.log(data);
+			var imgs = data.entry_data.TagPage[0].tag.media.nodes;
+			console.log(imgs);
+			var images = [];
+			for(var i=0;i<imgs.length;i++)
+			{
+				if (!imgs[i].is_video && imgs[i].display_src) images.push( imgs[i].display_src);
+			}
 			return images;
 		},
 

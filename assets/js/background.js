@@ -45,7 +45,14 @@ rather.bg = {
 									return rather.log("Error loading RSS feed. Ignoring. Item Id :: " + item.replace_id);
 								}
 
-								var images = rather.feed.parse(data);
+								if (item.type == 'Instagram Hashtag')
+								{
+									var images = rather.feed.parseInstagramPage(data);
+								}
+								else
+								{
+									var images = rather.feed.parse(data);
+								}
 								rather.log(images.length + " images retreived from feed. Caching Item Id ::" + item.replace_id);
 								rather.feed.save_cache(item.replace_id,images);
 							});
