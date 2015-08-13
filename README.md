@@ -1,3 +1,3 @@
 # rather
 
-Rather is a chrome browser extension. It can replace facebook and twitter feeds you don't like to something you like.
+rather is an open source social filtering utility that blocks things you don't want to see on Facebook and Twitter by replacing them with things you'd rather see, like cats. rather is published under the GNU GPL (3.0) license. 
